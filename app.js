@@ -5,16 +5,39 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
+var db = require('./db');
+var setting = require('./setting');
+var session = require('express-session');
+var MongoStore =  require('connect-mongo')(session);
 
 //设置我们的app应用的路由架构,引入各个功能模块对应的导航模块
 var index = require('./routes/index');
 var users = require('./routes/users');
+var articles = require('./routes/articles');
+
 
 var app = express();
 
 // 设置模板引擎
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
+
+
+
+app.use(session({
+  secret:setting.cookieSecret,//对cookie加密,防止篡改cookie
+  key:setting.db,//key为cookie中保存的键值
+  cookie:{maxAge:1000*60*60*24*30},//设置cookie的有效时间
+  resave:true,
+  saveUninitialized:true,//是否保存未初始化状态
+  store:new MongoStore({
+      //设置session的信息保存到数据库中
+      // db:setting.db,
+      // host:setting.host,
+      // port:setting.port
+    url:setting.url
+  })
+}))
 
 
 // uncomment after placing your favicon in /public
@@ -32,9 +55,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 //路由映射 路由的设定应该遵循Restful设计原则
 app.use('/', index);
 app.use('/users', users);
-
-
-
+app.use('/articles',articles);
 
 
 
