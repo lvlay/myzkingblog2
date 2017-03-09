@@ -10,6 +10,8 @@ var setting = require('./setting');
 var session = require('express-session');
 var MongoStore =  require('connect-mongo')(session);
 
+var flash = require('connect-flash');
+
 //设置我们的app应用的路由架构,引入各个功能模块对应的导航模块
 var index = require('./routes/index');
 var users = require('./routes/users');
@@ -51,6 +53,24 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 //设置静态资源的路由
 app.use(express.static(path.join(__dirname, 'public')));
+
+//给request对象添加flash功能
+app.use(flash());
+//添加一个中间件,用来处理flash消息
+
+app.use(function (req,res,next) {
+
+    res.locals.user = req.session.user;
+
+  // 是将session中保存的flash信息复制到response对象的locals属性中,
+  //这样才能在模板上显示这些信息
+    res.locals.err = req.flash('error').toString();
+    res.locals.suc = req.flash('success').toString();
+    //调用next()放行请求
+    next();
+});
+
+
 
 //路由映射 路由的设定应该遵循Restful设计原则
 app.use('/', index);

@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+var middleware = require("../middleware/index");
 
 
 //访问登陆页面
@@ -15,26 +16,25 @@ router.post('/login', function(req, res,next) {
     var user = req.body;
     user.password= md5(user.password);
     //查询数据库,找到是否有匹配的记录
-    Model("User").findOne(user,function (err,user) {
-        console.log(user);
-        if(user)
+    Model("User").findOne(user,function (err,u) {
+        console.log(u);
+        if(u)
         {
             //用户登陆成功  将用户的登陆信息保存到session中
-            req.session.user =user;
+            req.flash("success","登陆成功");
+            req.session.user =u;
             return res.redirect("/");
         }
-        //   req.flash("err",err);
+        req.flash("error","登陆失败,用户名或密码错");
         return res.redirect("/users/login");
 
     })
 });
 
 //打开注册页面
-router.get('/reg',function (req,res,next) {
+router.get('/reg',middleware.checkNotLogin,function (req,res,next) {
   console.log("打开注册页面");
     res.render("users/reg",{title:"注册"});
-
-
 });
 //提交注册信息
 router.post('/reg',function (req,res,next) {
@@ -46,7 +46,7 @@ router.post('/reg',function (req,res,next) {
     if(user.password != user.pwd2)
     {
         //密码和确认密码不一致
-      //  req.flash('error',"两次密码不一致");
+        req.flash('error',"两次密码不一致");
         //重定向到注册页面
         return res.redirect("/users/reg");
     }
@@ -60,10 +60,11 @@ router.post('/reg',function (req,res,next) {
     new Model("User")(user).save(function (err,user) {
         if(err)
         {
-    //        req.flash("err",err);
+            req.flash("error","注册失败");
             res.redirect("/users/reg");
         }
         //在session中保存用户的登陆信息
+        req.flash("success","注册成功");
         req.session.user=user;
         res.redirect("/");
     })
@@ -71,7 +72,10 @@ router.post('/reg',function (req,res,next) {
 //注销用户登陆
 router.get('/logout',function (req,res,next) {
 
-  console.log("退出登陆");
+    req.session.user=null;
+    console.log("退出登陆");
+    req.flash("success","用户登陆已注销");
+    res.redirect("/");
 
 });
 
