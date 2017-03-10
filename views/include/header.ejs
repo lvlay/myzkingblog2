@@ -33,6 +33,15 @@
             </li>
             <%}%>
         </ul>
+        <form class="navbar-form navbar-left" action="/articles/list/1/2" method="post" role="search">
+            <div class="form-group">
+                <input type="text" class="form-control" name="keyword" value="<%=keyword%>" placeholder="Search">
+            </div>
+            <input type="submit" name="searchBtn" value="搜索" class="btn btn-default">
+
+        </form>
+
+
     </div>
 </nav>
    <div class ="container text-center">

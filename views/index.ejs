@@ -27,9 +27,21 @@
              <%
                 });
              %>
-
-
          </ul>
     </div>
+
+<nav>
+    <ul class="pagination">
+        <%
+            //求出总页数
+            var total = Math.ceil(count/pageSize)
+        for(var i=1;i<=total;i++){
+        %>
+        <li><a href="/articles/list/<%=i%>/<%=pageSize%>"><%=i%></a></li>
+        <%
+        }
+        %>
+    </ul>
+</nav>
 
 <% include include/footer.ejs%>
